@@ -1,24 +1,37 @@
 # Test Report: @go/safe
 
-## 📋 测试概览
-- **测试时间**: 2026-04-22
-- **测试环境**: darwin/amd64
+## 测试环境
+- **操作系统**: darwin
+- **架构**: amd64
 - **Go 版本**: 1.25.0
 
-## ✅ 功能测试 (Functional Tests)
-| 场景 | 状态 | 描述 |
-| :--- | :--- | :--- |
-| `TestSafeBuf` | PASS | 验证加解密一致性，及 `Close()` 后的数据清理。 |
-| `TestMemoryErasure` | PASS | 验证内存物理擦除，确保明文内存被覆盖。 |
-| `TestSafeBufCustomObfuscator` | PASS | 验证自定义加解密钩子的注入逻辑。 |
-| `TestDisableCoreDump` | PASS | 验证系统级 CoreDump 防御接口调用。 |
+## 覆盖场景
+1. **SafeBuf 基础功能**: 验证 `NewSafeBuf`, `Open`, `Close` 的闭环逻辑。
+2. **内存物理擦除**: 通过 `unsafe` 指针直接验证 `ZeroMemory` 是否成功覆盖了已关闭的明文数据。
+3. **自定义混淆器**: 验证 `SetSafeBufObfuscator` 注入自定义算法的有效性。
+4. **Core Dump 防御**: 验证 `DisableCoreDump` 在当前系统下的调用。
+5. **ChaCha20 健壮性**: (已在代码中增加长度校验与错误处理)。
 
-## 🛡️ 鲁棒性防御 (Robustness)
-- **内存锁定 (Mlock)**: 针对 Unix/Windows 实现了系统级内存锁定，防止敏感数据 Swapping 到硬盘。
-- **Core Dump 防御**: 从操作系统层级禁止核心转储，防御异常导致的数据泄露。
-- **全生命周期销毁**: 结合 `ZeroMemory` 与 `runtime.Finalizer`，确保敏感数据随对象销毁自动物理擦除。
+## 测试结果
+```
+=== RUN   TestSafeBuf
+--- PASS: TestSafeBuf (0.00s)
+=== RUN   TestMemoryErasure
+--- PASS: TestMemoryErasure (0.00s)
+=== RUN   TestSafeBufCustomObfuscator
+--- PASS: TestSafeBufCustomObfuscator (0.00s)
+=== RUN   TestDisableCoreDump
+--- PASS: TestDisableCoreDump (0.00s)
+PASS
+ok      apigo.cc/go/safe        0.371s
+```
 
-## ⚡ 性能基准 (Benchmarks)
-| 函数 | 平均耗时 | 性能分析 |
-| :--- | :--- | :--- |
-| `BenchmarkSafeBufOpenClose` | **1095 ns/op** | 纳秒级加解密处理，对业务性能影响极小。 |
+## 性能测试 (Benchmark)
+```
+goos: darwin
+goarch: amd64
+pkg: apigo.cc/go/safe
+cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
+BenchmarkSafeBufOpenClose-16              976933              1319 ns/op
+```
+*注：引入更强随机种子的内存擦除后，单次操作耗时约增加 300ns，符合预期。*

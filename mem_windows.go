@@ -4,6 +4,8 @@
 package safe
 
 import (
+	"unsafe"
+
 	"golang.org/x/sys/windows"
 )
 

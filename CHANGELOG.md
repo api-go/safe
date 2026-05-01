@@ -1,5 +1,16 @@
 # Changelog: @go/safe
 
+## [v1.0.4] - 2026-05-01
+
+### Fixed
+- **Windows 兼容性**：修复 `mem_windows.go` 缺失 `unsafe` 导入导致的编译失败。
+
+### Improved
+- **命名规范**：重构短变量名（如 `sb`, `sp`）为更具描述性的名称，提升代码可读性。
+- **鲁棒性增强**：为 `ChaCha20` 加解密增加长度校验与错误处理。
+- **安全性提升**：改进 `ZeroMemory` 的随机种子生成机制，引入 `crypto/rand` 熵池。
+- **内存锁定处理**：显式处理 `LockMemory`/`UnlockMemory` 的潜在错误。
+
 ## [v1.0.0] - 2026-04-22
 
 ### Added
