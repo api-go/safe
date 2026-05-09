@@ -30,6 +30,13 @@
 - `func NewSafeString(data []byte) (*SecretPlaintext, string)`: 创建临时的安全字符串。
 - `func MakeSafeToken(size int) []byte`: 生成带随机偏移的安全令牌。
 
+### 无感安全辅助工具 (Frictionless Security Helpers)
+提供基于可变参数 `...any` 的隐式拼接与编码能力。所有操作均在底层私有缓冲区完成，并在返回持久加密的 `*SafeBuf` 后立刻物理擦除中间明文，彻底杜绝字符串拼接造成的内存泄露。
+- `func Concat(parts ...any) *SafeBuf`: 隐式安全拼接。
+- `func Base64(parts ...any) *SafeBuf`: 隐式安全拼接并 Base64 编码。
+- `func Hex(parts ...any) *SafeBuf`: 隐式安全拼接并 Hex 编码。
+- `func UrlEncode(parts ...any) *SafeBuf`: 隐式安全拼接并 URL 编码。
+
 ### 混淆器与算法
 - `func SetSafeBufObfuscator(enc, dec)`: 自定义 SafeBuf 的底层加密逻辑。
 - `func EncryptChaCha20(raw, key, salt []byte) []byte`

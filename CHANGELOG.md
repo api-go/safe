@@ -1,5 +1,14 @@
 # Changelog: @go/safe
 
+## [v1.0.6] - 2026-05-09
+
+### Added
+- **安全拼接 (Concat)**：新增 `Concat` 工具，支持对多个敏感部分（SafeBuf, SecretPlaintext, string, []byte）进行零残留安全拼接，返回持久加密的 `SafeBuf`。
+- **安全编码 (Base64/Hex/UrlEncode)**：新增多种编码工具，支持接受 `...any` 变长参数。内置隐式安全拼接能力（无需额外调用 `Concat`），直接返回持久加密的 `SafeBuf` 对象，脱离对 GC Finalizer 的强依赖，安全且可重复使用。
+
+### Improved
+- **生命周期增强**：优化了 `SecretPlaintext` 的安全性，增强了 `String()` 方法的鲁棒性。
+
 ## [v1.0.4] - 2026-05-01
 
 ### Fixed

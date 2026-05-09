@@ -2,12 +2,16 @@ package safe
 
 import (
 	crand "crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
+	"encoding/hex"
+	"net/url"
 	"runtime"
 	"sync"
 	"time"
 	"unsafe"
 
+	"apigo.cc/go/cast"
 	"apigo.cc/go/rand"
 	"golang.org/x/crypto/chacha20"
 )
@@ -116,7 +120,7 @@ type SecretPlaintext struct {
 
 // String 返回明文的字符串表示
 func (secret *SecretPlaintext) String() string {
-	if len(secret.Data) == 0 {
+	if secret == nil || len(secret.Data) == 0 {
 		return ""
 	}
 	return unsafe.String(&secret.Data[0], len(secret.Data))
@@ -124,10 +128,20 @@ func (secret *SecretPlaintext) String() string {
 
 // Close 清除明文数据
 func (secret *SecretPlaintext) Close() {
-	if secret.Data != nil {
+	if secret != nil && secret.Data != nil {
 		ZeroMemory(secret.Data)
 		secret.Data = nil
 	}
+}
+
+// newSecretPlaintext 内部辅助函数，统一绑定 Finalizer 作为安全兜底
+func newSecretPlaintext(data []byte) *SecretPlaintext {
+	secret := &SecretPlaintext{Data: data}
+	// GC Finalizer 仅作为兜底策略，主生命周期应由调用者显式管理
+	runtime.SetFinalizer(secret, func(obj *SecretPlaintext) {
+		obj.Close()
+	})
+	return secret
 }
 
 // NewSafeBuf 创建一个新的 SafeBuf
@@ -153,20 +167,22 @@ func NewSafeBufFromEncrypted(cipher, salt []byte) *SafeBuf {
 
 // Open 解密 SafeBuf 并返回明文副本
 func (safeBuf *SafeBuf) Open() *SecretPlaintext {
+	if safeBuf == nil {
+		return &SecretPlaintext{}
+	}
 	data := safeBufDecrypt(safeBuf.buf, safeBuf.salt)
 	if data == nil {
 		return &SecretPlaintext{}
 	}
 	_ = LockMemory(data)
-	secret := &SecretPlaintext{Data: data}
-	runtime.SetFinalizer(secret, func(obj *SecretPlaintext) {
-		obj.Close()
-	})
-	return secret
+	return newSecretPlaintext(data)
 }
 
 // Close 擦除 SafeBuf 中的加密数据
 func (safeBuf *SafeBuf) Close() {
+	if safeBuf == nil {
+		return
+	}
 	_ = UnlockMemory(safeBuf.buf)
 	ZeroMemory(safeBuf.buf)
 	_ = UnlockMemory(safeBuf.salt)
@@ -175,9 +191,106 @@ func (safeBuf *SafeBuf) Close() {
 
 // NewSafeString 创建一个临时的敏感字符串
 func NewSafeString(raw []byte) (*SecretPlaintext, string) {
-	secret := &SecretPlaintext{Data: raw}
-	runtime.SetFinalizer(secret, func(obj *SecretPlaintext) {
-		obj.Close()
-	})
+	secret := newSecretPlaintext(raw)
 	return secret, secret.String()
+}
+
+// Concat 安全地拼接多个部分并返回一个持久加密的 SafeBuf 对象
+func Concat(parts ...any) *SafeBuf {
+	return NewSafeBufAndErase(buildBytes(parts...))
+}
+
+// Base64 对输入进行拼接与编码，并返回一个持久加密的 SafeBuf 对象
+func Base64(parts ...any) *SafeBuf {
+	src := buildBytes(parts...)
+	defer ZeroMemory(src)
+
+	buf := make([]byte, base64.StdEncoding.EncodedLen(len(src)))
+	base64.StdEncoding.Encode(buf, src)
+
+	return NewSafeBufAndErase(buf)
+}
+
+// Hex 将数据拼接并转换为 Hex 编码，返回一个持久加密的 SafeBuf 对象
+func Hex(parts ...any) *SafeBuf {
+	src := buildBytes(parts...)
+	defer ZeroMemory(src)
+
+	buf := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(buf, src)
+
+	return NewSafeBufAndErase(buf)
+}
+
+// UrlEncode 对数据拼接并进行 URL 编码，返回一个持久加密的 SafeBuf 对象
+func UrlEncode(parts ...any) *SafeBuf {
+	src := buildBytes(parts...)
+	defer ZeroMemory(src)
+
+	// 使用 unsafe.String 避免对 src 产生额外的 string 分配
+	srcStr := unsafe.String(&src[0], len(src))
+	encoded := url.QueryEscape(srcStr)
+	buf := []byte(encoded)
+
+	return NewSafeBufAndErase(buf)
+}
+
+func buildBytes(parts ...any) []byte {
+	totalLen := 0
+	for _, p := range parts {
+		totalLen += partLen(p)
+	}
+
+	buf := make([]byte, totalLen)
+	pos := 0
+	for _, p := range parts {
+		pos += copyPart(buf[pos:], p)
+	}
+	return buf
+}
+
+func partLen(v any) int {
+	switch t := v.(type) {
+	case string:
+		return len(t)
+	case []byte:
+		return len(t)
+	case *SecretPlaintext:
+		if t == nil {
+			return 0
+		}
+		return len(t.Data)
+	case *SafeBuf:
+		if t == nil {
+			return 0
+		}
+		p := t.Open()
+		defer p.Close()
+		return len(p.Data)
+	default:
+		return len(cast.String(v))
+	}
+}
+
+func copyPart(dst []byte, v any) int {
+	switch t := v.(type) {
+	case string:
+		return copy(dst, t)
+	case []byte:
+		return copy(dst, t)
+	case *SecretPlaintext:
+		if t == nil {
+			return 0
+		}
+		return copy(dst, t.Data)
+	case *SafeBuf:
+		if t == nil {
+			return 0
+		}
+		p := t.Open()
+		defer p.Close()
+		return copy(dst, p.Data)
+	default:
+		return copy(dst, cast.String(v))
+	}
 }
