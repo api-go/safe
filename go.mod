@@ -7,3 +7,5 @@ require (
 	golang.org/x/crypto v0.50.0
 	golang.org/x/sys v0.43.0
 )
+
+require apigo.cc/go/cast v1.2.10
