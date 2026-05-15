@@ -8,4 +8,4 @@ require (
 	golang.org/x/sys v0.44.0
 )
 
-require apigo.cc/go/cast v1.3.0
+require apigo.cc/go/cast v1.3.3
