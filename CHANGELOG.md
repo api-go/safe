@@ -1,3 +1,7 @@
+## [v1.5.5] - 2026-11-10
+
+- 迁移至 github.com/api-go/safe，同步内部模块路径与依赖。
+
 # Changelog: @go/safe
 
 ## v1.5.4 (2026-09-05)

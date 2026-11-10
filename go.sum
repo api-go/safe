@@ -1,9 +1,9 @@
-apigo.cc/go/cast v1.5.6 h1:KCN3fWS5lw81CUD3uuqR+rXHr3vupGWPpSf+zm4Fm7Y=
-apigo.cc/go/cast v1.5.6/go.mod h1:ivFIhE2MdJbmLYO04xe7gmNlccJ8Su6B0hTwz0ZA6zQ=
-apigo.cc/go/jsmod v1.5.4 h1:r76LbQww674avYt8vITmrhNwM2WSnlriCLECNjXsR1o=
-apigo.cc/go/jsmod v1.5.4/go.mod h1:bmyeZtOAP/j5am+YRnaiM89smysK24K7ebk0koFtsSw=
-apigo.cc/go/rand v1.5.4 h1:eessFBsKQuoOYdzrStldOGw9f4HqbeO87X95bI4jIBQ=
-apigo.cc/go/rand v1.5.4/go.mod h1:q1BTFkY/cXE229dDD5Q22lF7T0DoKPV6xAu+6bCrDH4=
+github.com/api-go/cast v1.5.9 h1:uGqSU5LIdEzDUqOiijZTP0co6D5vH4RsD74N9tvvWZ0=
+github.com/api-go/cast v1.5.9/go.mod h1:rQlpuIPrwsbpX/gsAT9DvV9JrhucYFXwPFiGjJQaiFo=
+github.com/api-go/jsmod v1.5.6 h1:oKxET1gUqQ1f7vrXTD5d7LhAS7p6LtpGcIgBh7pcuK0=
+github.com/api-go/jsmod v1.5.6/go.mod h1:vdE5pnGhXIM0MxMzPTmlQbqNy9s+RlHiJgwhha4j/So=
+github.com/api-go/rand v1.5.5 h1:m2owjmCDypI29sPjBvCCGBr7XQy83snjTirICLFXz6U=
+github.com/api-go/rand v1.5.5/go.mod h1:/ivUBCv/JKchEqxhvwLRg+rHR9hBHA9RpAtRM1OkxHU=
 golang.org/x/crypto v0.52.0 h1:RMs7fP2rXdep0CftQlK8Uf+kibLm7qkCcradZWYz988=
 golang.org/x/crypto v0.52.0/go.mod h1:1QgfPxDqh0T2M/elOJtp9RvuR95kVjir0e6/BvEmGbc=
 golang.org/x/sys v0.45.0 h1:dO4czNzziLiiXplLQgBCEpCvXQ3dnkn0SdaZSYdQ+FY=

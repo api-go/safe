@@ -11,14 +11,14 @@ import (
 	"time"
 	"unsafe"
 
-	"apigo.cc/go/cast"
-	"apigo.cc/go/rand"
+	"github.com/api-go/cast"
+	"github.com/api-go/rand"
 	"golang.org/x/crypto/chacha20"
 )
 
 // MakeSafeToken 生成指定大小的随机字节令牌
 func MakeSafeToken(size int) []byte {
-	// 使用 rand.Int (apigo.cc/go/rand) 生成偏移量
+	// 使用 rand.Int (github.com/api-go/rand) 生成偏移量
 	fixsize := rand.Int(1, size/10+2)
 	key := make([]byte, size+fixsize*2)
 	crand.Read(key)

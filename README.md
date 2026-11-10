@@ -45,5 +45,5 @@
 ## 📦 安装
 
 ```bash
-go get apigo.cc/go/safe
+go get github.com/api-go/safe
 ```

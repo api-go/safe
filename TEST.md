@@ -26,15 +26,25 @@
 === RUN   TestDisableCoreDump
 --- PASS: TestDisableCoreDump (0.00s)
 PASS
-ok      apigo.cc/go/safe        0.371s
+ok      github.com/api-go/safe        0.371s
 ```
 
 ## 性能测试 (Benchmark)
 ```
 goos: darwin
 goarch: amd64
-pkg: apigo.cc/go/safe
+pkg: github.com/api-go/safe
 cpu: Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
 BenchmarkSafeBufOpenClose-16              976933              1319 ns/op
 ```
 *注：引入更强随机种子的内存擦除后，单次操作耗时约增加 300ns，符合预期。*
+
+## GitHub migration validation (pending release)
+
+Module paths and internal dependency versions are migrated. Development verification uses GOWORK=off and explicit sibling replacements; remove these replacements before release. See migration validation logs for actual results. Existing unrelated working changes are preserved and require separate review.
+
+API inventory verification: `GOWORK=off go doc` succeeded; output retained in the migration validation directory. Source exports were preserved by the path migration.
+
+## GitHub release verification
+
+GOWORK=off go test -v ./... and go test -bench=. ./... passed using published GitHub dependencies, without local replacements. go mod verify passed.
